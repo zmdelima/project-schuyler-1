@@ -62,7 +62,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     </style>
     <div id="editor" on-click="" on-dragStart="onDragStart" on-dragEnd="onDragEnd">
-      <div id="main-container" class="card">
+      <div id="main-container">
         <div id="timeline-editor" >
           <div id="playerDiv">
             <!--PLAYER-->
@@ -110,7 +110,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </template>
           </div>
         </div>
-        <paper-button raised on-click="openModal">SET MAIN VIDEO</paper-button>
+        <paper-button raised id="mainVidSetter" on-click="openModal">SET MAIN VIDEO</paper-button>
+        <paper-button raised id="viewVid" on-click="changeMode" value="0" >VIEW VIDEO</paper-button>
         <paper-dialog id="modal" dialog>
           <p>Enter youtube link</p>
           <paper-input id="newID"></paper-input>
@@ -164,6 +165,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
         mainMedia: {
           type: Object,
+          value: {
+            length:300,
+          },
           notify: true
         },
         onDrag: Boolean,
@@ -174,7 +178,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           observer: '_currentTimeChange'
         },
         currentTimeFormatted: String,
-        duration: Number,
+        duration: {
+          type: Number,
+          value: 1,
+          observer: '_changeMainLength'
+        },
         durationFormatted: String,
         fractionLoaded: Number,
         volume: Number,
@@ -195,6 +203,50 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         console.log(oldData);
         this.mfdata = newData;
       },
+      changeMode: function() {
+        // height: 48vh;
+        // width: 63vw;
+        
+        //height: 80vh
+        //width: 90vw;
+        var mode = this.root.querySelector('#viewVid').getAttribute('value');
+        var hide = "visibility: hidden; display: none;";
+        var show = "display: inline; visibility: visible;";
+        var timeline = this.root.querySelector('#timeline');
+        var playerDiv = this.root.querySelector('#playerDiv');
+        var mainVidSetter = this.root.querySelector('#mainVidSetter');
+        var medialib = this.root.querySelector('#media-lib');
+        var player = this.root.querySelector('#player');
+        if(mode == 0){
+          console.log('mode is 0');
+          timeline.style.visibility = 'hidden'; 
+          timeline.style.display = 'none'; 
+          mainVidSetter.style.visibility = 'hidden'; 
+          mainVidSetter.style.visibility = 'none'; 
+          medialib.style.display = 'hidden'; 
+          medialib.style.display = 'none';
+          player.style.width = '85vw';
+          player.style.height = '80vh';
+          playerDiv.style.width = '85vw';
+          playerDiv.style.height = '80vh';
+          this.root.querySelector('#viewVid').setAttribute('value','1');
+          this.root.querySelector('#viewVid').innerHTML = "VIEW EDITOR";
+        } else {
+          timeline.style.visibility = 'visible'; 
+          timeline.style.display = 'inline'; 
+          mainVidSetter.style.visibility = 'visible'; 
+          mainVidSetter.style.visibility = 'inline'; 
+          medialib.style.display = 'visible'; 
+          medialib.style.display = 'inline';
+          player.style.width = '63vw';
+          player.style.height = '48vh';
+          playerDiv.style.width = '63vw';
+          playerDiv.style.height = '48vh';
+          this.root.querySelector('#viewVid').setAttribute('value','0');
+          this.root.querySelector('#viewVid').innerHTML = "VIEW VIDEO";
+        }
+        
+      },
       reposition: function(event) {
         var timelineDiv = this.$.timeline;
         var offset = this.$.editor.getBoundingClientRect().width * 0.05;
@@ -206,6 +258,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         //Reposition seek bar
         this.$.player.seekTo(len/100 * this.duration);
       },
+      _changeMainLength: function() {
+        this.mainMedia.length = this.duration;
+        this.renderLayers();
+      },
       _currentTimeChange: function() {
         console.log(this.currentTime);
         var needle = this.root.querySelector('#needle');
@@ -215,13 +271,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         //Render overlays when current time and overylay start time matches
         console.log(this.overlays);
         for (var i=0; i<this.overlays.length; i++) {
-          if (this.overlays[i].startTime <= this.currentTime && this.overlays[i].startTime + this.overlays.length >= this.currentTime) {
-            console.log('in');
-            console.log(this.overlays[i].name);
+          if (this.overlays[i].startTime <= this.currentTime && this.overlays[i].startTime + this.overlays[i].length >= this.currentTime) {
+            // console.log('in');
+            // console.log(this.overlays[i].name);
             this.renderOverlay(this.overlays[i],0);
-          } else if(this.overlays[i].startTime + this.overlays.length <= this.currentTime || this.overlays[i].startTime > this.currentTime) {
-            console.log('out');
-            console.log(this.overlays[i].name);
+          } else if(this.overlays[i].startTime + this.overlays[i].length <= this.currentTime || this.overlays[i].startTime > this.currentTime) {
+            // console.log('out');
+            // console.log(this.overlays[i].name);
             this.renderOverlay(this.overlays[i],1);
           }
         }
@@ -230,7 +286,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.$.modal.open();
       },
       renderOverlay: function(o, mode) {
-        console.log("rendering overlays");
+        // console.log("rendering overlays");
         
         var overlay = document.createElement('div');
         overlay.style.zIndex = 2001;
@@ -238,13 +294,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         overlay.style.height = "22.5%";
         overlay.style.background = "blue";
         overlay.style.position = "absolute";
-        overlay.style.left = "4vw";
-        overlay.style.top = "7vw";
+        overlay.style.left = "4%";
+        overlay.style.top = "18%";
         overlay.style.fontSize = "2.5vh";
         overlay.style.overflow = "hidden";
         overlay.style.wordBreak = "break-all";
         var url = o.url;
-        console.log('new ID = '+url);
+        // console.log('new ID = '+url);
         overlay.setAttribute('value','');
         if (!(url == '' || url == undefined)) {
         var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
@@ -253,14 +309,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         overlay.setAttribute('value',vidID);
         }
         if (o.layer == 'layer2') {
-          overlay.style.left = "44vw";
+          overlay.style.left = "49%";
         } else if (o.layer == 'layer3') {
-          overlay.style.top = "29.5vw";
+          overlay.style.top = "56%";
         } else if (o.layer == 'layer4') {
-          overlay.style.left = "44vw";
-          overlay.style.top = "29.5vw";
+          overlay.style.left = "49%";
+          overlay.style.top = "56%";
         } 
-        overlay.innerHTML = o.name;
+        var pic = document.createElement('img');
+        pic.setAttribute('src',o.src);
+        pic.setAttribute('style','height:50%;width:50%;');
+        overlay.appendChild(pic);
+        var txt = document.createElement('p');
+        txt.style.zIndex = 2004;
+        overlay.innerHTML += o.name;
         overlay.setAttribute('id','p-overlay'+o.id);
         
         if(mode==0 && this.root.querySelector('#p-overlay'+o.id) == null) this.root.querySelector('#playerDiv').appendChild(overlay);
@@ -304,6 +366,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             name: 'dog2',
             id: 'overlay1',
             length: 10,
+            src: '../../../images/manifest/icon-192x192.png',
             url:'https://www.youtube.com/watch?v=_GuOjXYl5ew',
             startTime: 5,
             id: 1
@@ -314,6 +377,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             id: 'overlay2',
             length: 20,
             startTime: 10,
+            src: '../../../images/manifest/icon-48x48.png',
             url:'https://www.youtube.com/watch?v=_GuOjXYl5ew',
             id: 2
           },
@@ -323,6 +387,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             id: 'overlay3',
             length: 10,
             startTime: 20,
+            src: '../../../images/manifest/icon-96x96.png',
             url: 'https://www.youtube.com/watch?v=_GuOjXYl5ew',
             id: 3
             
@@ -332,6 +397,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             name: 'cat',
             id: 'overlay4',
             length: 30,
+            src: '../../../images/manifest/icon-48x48.png',
+            url: 'https://www.youtube.com/watch?v=_GuOjXYl5ew',
             startTime: 40,
             id: 4
           },
@@ -340,6 +407,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             name: 'cat200',
             id: 'overlay5',
             length: 20,
+            src: '../../../images/manifest/icon-48x48.png',
+            url: 'https://www.youtube.com/watch?v=_GuOjXYl5ew',
             startTime: 30,
             id: 5
           }
@@ -453,10 +522,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         introJs().start();
         console.log("asdas");
         var url = this.root.querySelector('#newID').value;
-        console.log('new ID = '+url);
+        if(url == '') return;
+        // console.log('new ID = '+url);
         var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
         var match = url.match(regExp);
         var id =  (match&&match[7].length==11)? match[7] : false;
+        if(id == undefined || id=='') return;
         this.root.querySelector('.vidplayer').setAttribute('video-id',id);
       },
       getRandomColor: function () {
