@@ -13,7 +13,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <!-- shared styles for all views -->
 <dom-module id="shared-styles">
   <template>
-    <style>
+    <style is="custom-style">
       .card {
         margin: 24px;
         padding: 16px;
@@ -48,7 +48,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         font-size: 22px;
       }
       
-      #editor{
+    paper-button {
+        background-color: var(--paper-indigo-500);
+        color: white;
+        --paper-button-raised-keyboard-focus: {
+          background-color: var(--paper-indigo-500) !important;
+          color: white !important;
+        };
+    }
+    
+    #editor{    
         /*background: white;*/
         /*width: 100vw;*/
         /*height: 100vh;*/
@@ -59,7 +68,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         /*background: #AAAAAA;*/
         position: relative;
         height: 80vh;
-        width: 90vw;
+        width: 95vw;
         margin: auto auto;
     }
     #timeline-editor {
