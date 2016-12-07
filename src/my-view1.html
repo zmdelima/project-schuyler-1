@@ -1,0 +1,508 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/app-layout/app-drawer/app-drawer.html">
+<link rel="import" href="../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/app-route/app-location.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/google-youtube/google-youtube.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="my-view1">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+
+        padding: 10px;
+      }
+    </style>
+    <firebase-document
+      id="document"
+      path="/schuyler/text"
+      data="{{text}}"
+    >
+    <firebase-query
+    id="query"
+    path="/schuyler/mfdata"
+    data="{{mfdataOnline}}"
+    >
+    <style is="custom-style" include="schuyler-home-page-style">
+      :host {
+        display: block;
+      }
+
+    </style>
+    <div id="editor" on-click="" on-dragStart="onDragStart" on-dragEnd="onDragEnd">
+      <div id="main-container" class="card">
+        <div id="timeline-editor" >
+          <div id="playerDiv">
+            <!--PLAYER-->
+            <google-youtube id="player"
+                    playsupported="{{playSupported}}"
+                    video-id="s6MwGeOm8iI"
+                    state="{{state}}"
+                    currenttime="{{currentTime}}"
+                    currenttimeformatted="{{currentTimeFormatted}}"
+                    duration="{{duration}}"
+                    durationformatted="{{durationFormatted}}"
+                    fractionloaded="{{fractionLoaded}}"
+                    volume="{{volume}}"
+                    playbackrate="{{playbackRate}}"
+                    playbackquality="{{playbackQuality}}"
+                    on-google-youtube-state-change="handleStateChange"
+                    on-google-youtube-error="handleYouTubeError"
+                    class='vidplayer'
+                    video-id="s6MwGeOm8iI"
+                    width="inherit"
+                    height="inherit">
+            </google-youtube>
+              <!--<div style="z-index: 2000; width: 20vw; 10vh: 300px; background: red; position: absolute; left: 0vw; top: 3vh; overflow: hidden; word-break: break-all;">-->
+              <!--  HUAHUAHUAA-->
+              <!--</div>-->
+              <!--<div style="z-index: 2001; width: 20vw; 10vh: 300px; background: blue; position: absolute; left: 1vw; top: 3.5vh; overflow: hidden; word-break: break-all;">-->
+              <!--  HUAHUAHUAA-->
+              <!--</div>-->
+            
+
+         </div>
+          <div id="timeline" class="" on-tap="reposition">
+            <!--<template id="timeline-overlay-repeat" is="dom-repeat" items="[[layers]]">-->
+            <!--  <editor-layer id="[[item.id]]" class="tlayer" overlays="[[item.value]]" length="[[mainMedia.length]]" style="[[item.style]]"></editor-layer>-->
+            <!--</template>-->
+            <div id="needle" style="width: 2px; background-color: red; position: relative; height: 100%; z-Index:3000; float: left; left: 0vw;"></div>
+          </div>
+        </div>
+        <div id="media-lib" >
+          <div id="mlf">
+              <template is="dom-repeat" items="{{mfdataOnline}}">
+                <div class="mf" draggable="true">
+                  <img src="{{item.src}}" class="mf img" draggable="false" value="{{item}}"/>
+                  <p value="{{item}}"><br/>{{truncate(item.name,30)}}</p>
+                </div>
+              </template>
+          </div>
+          <button on-click="changeID">CHANGE VID NOW</button>
+        </div>
+      </div>
+    </div>
+
+    <!--<div class="card">-->
+    <!--  <div class="circle">1</div>-->
+    <!--  <h1>View One</h1>-->
+    <!--  <p>Ut labores minimum atomorum pro. Laudem tibique ut has.-->
+    <!--  <p>Lorem ipsum dolor sit amet, per in nusquam nominavi periculis, sit elit oportere ea.Lorem ipsum dolor sit amet, per in nusquam nominavi periculis, sit elit oportere ea.Cu mei vide viris gloriatur, at populo eripuit sit.</p>-->
+    <!--</div>-->
+  </template>
+
+  <script>
+    Polymer({
+      is: 'my-view1',
+      properties: {
+        text: {
+          type: String,
+          value: null,
+          observer: '_textChanged'
+        },
+        
+        mfdataOnline: {
+          type: Array,
+          value: [],
+          observer: '_mfdataChanged'
+        },
+        
+        eventId:{
+          type: String,
+          value: null,
+          notify: true,
+          reflectToAttribute: true
+        },
+        mfdata: {
+          type: Array,
+          notify: true,
+          reflectToAttribute: true
+        },
+        layers: {
+          type: Array,
+          value: []
+        },
+        overlays: {
+          type: Array,
+          value: [],
+          observer: '_overlayChange'
+        },
+        dragData: {
+          type: Object
+        },
+        mainMedia: {
+          type: Object,
+          notify: true
+        },
+        onDrag: Boolean,
+        playSupported: Boolean,
+        state: Number,
+        currentTime: {
+          type: Number,
+          observer: '_currentTimeChange'
+        },
+        currentTimeFormatted: String,
+        duration: Number,
+        durationFormatted: String,
+        fractionLoaded: Number,
+        volume: Number,
+        playbackRate: Number,
+        playbackQuality: String,
+        events: {
+          type: Array,
+          value: []
+        }
+      },
+      _textChanged: function(newData, oldData) {
+        console.log(newData);
+        console.log(oldData);
+      },
+      
+      _mfdataChanged: function(newData, oldData) {
+        console.log(newData);
+        console.log(oldData);
+        this.mfdata = newData;
+      },
+      reposition: function(event) {
+        var timelineDiv = this.$.timeline;
+        var offset = this.$.editor.getBoundingClientRect().width * 0.05;
+        console.log(event.detail.x);
+        var len = Math.round((event.detail.x - offset) * 1000000 / timelineDiv.getBoundingClientRect().width) / 10000;
+        console.log('len:'+len);
+        var needle = this.root.querySelector('#needle');
+        needle.style.left = len + '%';
+        //Reposition seek bar
+        this.$.player.seekTo(len/100 * this.duration);
+      },
+      _currentTimeChange: function() {
+        console.log(this.currentTime);
+        var needle = this.root.querySelector('#needle');
+        var needlePos = Math.round(this.currentTime * 1000000/ this.duration) /10000;
+        needle.style.left = needlePos+'%';
+        
+        //Render overlays when current time and overylay start time matches
+        console.log(this.overlays);
+        for (var i=0; i<this.overlays.length; i++) {
+          if (this.overlays[i].startTime >= this.currentTime) {
+            console.log(this.overlays[i].name);
+            this.renderOverlay(this.overlays[i],0);
+          } else if(this.overlays[i].startTime + this.overlays.length <= this.currentTime) {
+            this.renderOverlay(this.overlays[i],1);
+          }
+        }
+      },
+      
+      renderOverlay: function(o, mode) {
+        console.log("rendering overlays");
+        
+        var overlay = document.createElement('div');
+        overlay.style.zIndex = 2001;
+        overlay.style.width = "20vw";
+        overlay.style.height = "15vw";
+        overlay.style.background = "blue";
+        overlay.style.position = "absolute";
+        overlay.style.left = "1vw";
+        overlay.style.top = "3.5vw";
+        overlay.style.overflow = "hidden";
+        overlay.style.wordBreak = "break-all";
+        overlay.innerHTML = o.name; 
+        
+        if(!mode)this.root.querySelector('#playerDiv').appendChild(overlay);
+        else this.root.querySelector('#playerDiv').removeChild(this.root.querySelector('#'+o.id));
+      },
+      handleStateChange: function(event) {
+        console.log(event.detail.data);
+        console.log(this.duration);
+        if (event.detail.data == 1) {
+          console.log("I started the timer");
+          console.log("Current time is " + this.currentTime);
+        } else {
+        }
+      },
+      ready: function(){
+        this.mfdata1 = [
+            {
+              src: '../../../images/manifest/icon-48x48.png',
+              name: 'image1',
+              length: 50,
+              url: ''
+            },
+            {
+              src: '../../../images/manifest/icon-96x96.png',
+              name: 'The middle image that is supposed to be the not lossy state of the icon',
+              length: 90,
+              url: 'https://www.youtube.com/watch?v=OPf0YbXqDm0'
+            },
+            {
+              src: '../../../images/manifest/icon-192x192.png',
+              length: 70,
+              name: 'polymer image 3',
+              url: ''
+            }
+          ];
+        
+        
+        this.overlays2 = [
+          {
+            layer: 'layer2',
+            name: 'dog2',
+            id: 'overlay1',
+            length: 10,
+            startTime: 5,
+            id: 1
+          },
+          {
+            layer: 'layer2',
+            name: 'cat2',
+            id: 'overlay2',
+            length: 20,
+            startTime: 10,
+            id: 2
+          },
+          {
+            layer: 'layer1',
+            name: 'dog',
+            id: 'overlay3',
+            length: 10,
+            startTime: 20,
+            id: 3
+            
+          },
+          {
+            layer: 'layer1',
+            name: 'cat',
+            id: 'overlay4',
+            length: 30,
+            startTime: 40,
+            id: 4
+          },
+          {
+            layer: 'layer3',
+            name: 'cat2',
+            id: 'overlay5',
+            length: 20,
+            startTime: 30,
+            id: 5
+          }
+        ];
+        
+        this.mainMedia = {
+          'length': 600
+        };
+        this.renderLayers();
+      },
+      truncate: function(str, num){
+        if(str.length > num) {
+          return (str.substr(0,num)+"...");
+        } else {
+          return str.substr(0,num);
+        }
+      },
+      _overlayChange: function() {
+        var array = this.overlays;
+        var key = 'layer';
+        return array.sort(function(a, b) {
+            var x = a[key]; var y = b[key];
+            return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+        });
+      },
+      onDragStart: function(e){
+        var obj = this.root.elementFromPoint(e.clientX, e.clientY);
+        console.log(obj);
+        this.dragData = obj;
+      },
+      
+      onDragEnd: function(e){
+        var dropElement = this.root.elementFromPoint(e.clientX, e.clientY);
+        console.log(e.target);
+        
+        
+        //Check whether the user is trying to manipulate the overlay
+        if (e.target.getAttribute('class') === 'startDiv') {
+          var offset = this.$.editor.getBoundingClientRect().width * 0.05;
+          var newStartTime = ((e.clientX - offset) / (this.root.querySelector('#timeline').getBoundingClientRect().width)) * this.mainMedia.length;
+          console.log(newStartTime);
+          
+          //Update overlay data
+          for (var i=0; i<this.overlays.length; i++) {
+            if (this.overlays[i].id == e.target.parentElement.getAttribute('value')) {
+              var extend = this.overlays[i].startTime - newStartTime;
+              this.overlays[i].startTime = newStartTime;
+              this.overlays[i].length += extend;
+            }
+          }
+          this.renderLayers();
+          return;
+        } else if (e.target.getAttribute('class') === 'endDiv') {
+          var offset = this.$.editor.getBoundingClientRect().width * 0.05;
+          var newLength = ((e.clientX - offset) / (this.root.querySelector('#timeline').getBoundingClientRect().width)) * this.mainMedia.length;
+          
+          //Update overlay data
+          for (var i=0; i<this.overlays.length; i++) {
+            if (this.overlays[i].id == e.target.parentElement.getAttribute('value')) {
+              this.overlays[i].length = newLength - this.overlays[i].startTime;
+            }
+          }
+          this.renderLayers();
+          return;
+        }
+        
+        //Check whether the user is dragging an overlay along the timeline
+        if (e.target.getAttribute('class') === 't-overlay') {
+          var offset = this.$.editor.getBoundingClientRect().width * 0.05;
+          var newStartTime = ((e.clientX - offset) / (this.root.querySelector('#timeline').getBoundingClientRect().width)) * this.mainMedia.length;
+          
+          //Update overlay data
+          for (var i=0; i<this.overlays.length; i++) {
+            if (this.overlays[i].id == e.target.getAttribute('value')) {
+              this.overlays[i].startTime = newStartTime;
+            }
+          }
+          this.renderLayers();
+          return;
+        }
+        
+        
+        var data = this.dragData.value;
+        console.log('data');
+        var offset = this.root.querySelector('#editor').getBoundingClientRect().width * 0.05;
+        console.log('duration:'+this.mainMedia.length);
+        data.startTime = ((e.clientX - offset) / (this.root.querySelector('#timeline').getBoundingClientRect().width)) * this.mainMedia.length;
+        // console.log(data);
+        console.log('x:'+e.clientX);
+        console.log('offset:'+offset);
+        console.log('width:'+this.root.querySelector('#timeline').getBoundingClientRect().width);
+        console.log('time:'+data.startTime)
+        if(dropElement.getAttribute('class') === 't-layer') {
+          console.log('A LAYER!');
+          var overlayLayer = dropElement.getAttribute('id');
+          data.layer = overlayLayer;
+          data.id = this.overlays.length+1;
+          this.overlays.push(JSON.parse(JSON.stringify(data)));
+        } else if(dropElement.getAttribute('class') === 't-overlay') {
+          console.log('AN OVERLAY!');
+        }
+          this.renderLayers();
+      },
+      getChildNumber: function (node) {
+        return Array.prototype.indexOf.call(node.parentNode.childNodes, node);
+      },
+      changeID : function(){
+        var s = Math.random() * 100
+        console.log(s);
+        switch (true) {
+          case s < 33 : 
+            this.root.querySelector('.vidplayer').setAttribute('video-id','PT2_F-1esPk'); 
+            console.log('<33')
+          break;
+          case s < 67 : 
+            this.root.querySelector('.vidplayer').setAttribute('video-id','UqyT8IEBkvY'); 
+          break;
+          default: 
+            this.root.querySelector('.vidplayer').setAttribute('video-id','s6MwGeOm8iI'); 
+            console.log('default'); break;
+        }
+        this.$.player.play();
+        this.$.player.pause();
+      },
+      getRandomColor: function () {
+        var letters = '0123456789ABCDEF';
+        var color = '#';
+        for (var i = 0; i < 3; i++ ) {
+            color += letters[Math.floor(Math.random() * 6)+6];
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+      },
+      
+      extendLeft: function (e) {
+        console.log("wow");  
+      },
+      
+      renderLayers: function(){
+         var c = this.root.querySelector('#timeline');
+         c.innerHTML = '<div id="needle" style="width: 1px; background-color: red; position: relative; height: 100%; z-Index:3000; float: left; left: 0vw;"></div>';
+         var len = this.overlays.length;
+         var i;
+         
+         for(var i=1;i<5;i++){
+                     // console.log('create div');
+           l = document.createElement('div');
+           l.setAttribute('id','layer'+i);
+           l.setAttribute('class','t-layer');
+           l.setAttribute('style','width: inherit; height: 5vh; position: relative;');
+           this.root.querySelector('#timeline').appendChild(l);
+         }
+         for(i=0; i<len; i++){
+           var layer = this.overlays[i].layer;
+           var exist = (this.root.querySelector('#'+layer) == null) ? false : true;
+           var l;
+          // console.log(exist);
+           //create OVERLAY OBJ
+            var overlay = document.createElement('div');
+            var tLength = this.mainMedia.length;
+            var overlayWidth= 'width: '+ Math.round(this.overlays[i].length * 10000 / tLength)/100 + '%; ';
+            var color = 'background-color: '+this.getRandomColor() +'; ';
+            overlay.setAttribute('draggable','true');
+            overlay.setAttribute('class','t-overlay');
+            overlay.setAttribute('padding','3px;');
+            var left = 'position: absolute; left: '+Math.round(this.overlays[i].startTime * 10000 / tLength)/100+'%; top:0%;';
+            var others = 'height: inherit; float: left;'; 
+            var style = overlayWidth+color+left+others;
+            // console.log(style);
+            overlay.setAttribute('style',style);
+            overlay.setAttribute('value', this.overlays[i].id);
+            // console.log(overlay);
+            
+            //Create startDiv
+            var startDiv = document.createElement('div');
+            startDiv.setAttribute('style', 'background-color:black; height:100%; float: left; width: 3px; cursor: col-resize;')
+            startDiv.setAttribute('draggable', 'true');
+            startDiv.setAttribute('class', 'startDiv');
+            overlay.appendChild(startDiv);
+            //Create endDiv
+            var endDiv = document.createElement('div');
+            endDiv.setAttribute('style', 'background-color:black; height:100%; float: right; width: 3px; cursor: col-resize;')
+            endDiv.setAttribute('draggable', 'true');
+            endDiv.setAttribute('class', 'endDiv');
+            overlay.appendChild(endDiv);
+            
+            var content = document.createElement('div');
+            content.innerHTML = this.truncate(this.overlays[i].name,6);
+            content.setAttribute('style','float:center; height: inherit; text-overflow: clip; display: block; width: auto; overflow: hidden;');
+            overlay.appendChild(content);
+            
+           if(exist === false) {
+
+           } else {
+            // console.log('existing div')
+             l = this.root.querySelector('#'+layer);
+             l.appendChild(overlay);
+           }
+         };
+        console.log(this.overlays);
+      }
+
+    });
+  </script>
+</dom-module>
