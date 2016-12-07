@@ -15,7 +15,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <template>
     <style is="custom-style">
       .card {
-        margin: 24px;
+        margin-left: 10vw;
+        margin-right: 10vw;
         padding: 16px;
 
         color: #757575;
@@ -58,17 +59,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
     
     #editor{    
-        /*background: white;*/
-        /*width: 100vw;*/
-        /*height: 100vh;*/
-        position: relative;
-        /*top: 10vh;*/
+        background: white;
+        width: 100vw;
+        position: absolute;
+        top: 10vh;
+        height: 100vh;
     }
     #main-container{
         /*background: #AAAAAA;*/
         position: relative;
+        top: 10vh;
         height: 80vh;
-        width: 95vw;
+        width: 90vw;
         margin: auto auto;
     }
     #timeline-editor {
@@ -77,10 +79,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         width: 63vw;
         float: left;
     }
+    #playerDiv {
+        height: 48vh;
+        width: 63vw;
+        position: relative;
+    }
     #player {
         background: #ececec;
         height: 48vh;
         width: 63vw;
+        position:relative;
     }
     #timeline {
         background: #8A8A8A;
@@ -95,7 +103,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         overflow-x: hidden;
         overflow-y: scroll;
     }
-    
     #tlf {
         width: 100%;
         height: 100%;
