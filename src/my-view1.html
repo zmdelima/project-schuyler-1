@@ -244,10 +244,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         overlay.style.wordBreak = "break-all";
         var url = o.url;
         console.log('new ID = '+url);
+        overlay.setAttribute('value','');
+        if (!(url == '' || url == undefined)) {
         var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
         var match = url.match(regExp);
         var vidID =  (match&&match[7].length==11)? match[7] : false;
         overlay.setAttribute('value',vidID);
+        }
         if (o.layer == 'layer2') {
           overlay.style.left = "44vw";
         } else if (o.layer == 'layer3') {
@@ -300,6 +303,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             name: 'dog2',
             id: 'overlay1',
             length: 10,
+            url:'https://www.youtube.com/watch?v=_GuOjXYl5ew',
             startTime: 5,
             id: 1
           },
@@ -309,6 +313,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             id: 'overlay2',
             length: 20,
             startTime: 10,
+            url:'https://www.youtube.com/watch?v=_GuOjXYl5ew',
             id: 2
           },
           {
@@ -317,6 +322,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             id: 'overlay3',
             length: 10,
             startTime: 20,
+            url: 'https://www.youtube.com/watch?v=_GuOjXYl5ew',
             id: 3
             
           },
