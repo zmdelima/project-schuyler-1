@@ -241,6 +241,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         overlay.style.fontSize = "2.5vh";
         overlay.style.overflow = "hidden";
         overlay.style.wordBreak = "break-all";
+        var url = o.url;
+        console.log('new ID = '+url);
+        var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
+        var match = url.match(regExp);
+        var vidID =  (match&&match[7].length==11)? match[7] : false;
+        overlay.setAttribute('value',vidID);
         if (o.layer == 'layer2') {
           overlay.style.left = "44vw";
         } else if (o.layer == 'layer3') {
@@ -440,22 +446,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var match = url.match(regExp);
         var id =  (match&&match[7].length==11)? match[7] : false;
         this.root.querySelector('.vidplayer').setAttribute('video-id',id);
-        // var s = Math.random() * 100
-        // console.log(s);
-        // switch (true) {
-        //   case s < 33 : 
-        //     this.root.querySelector('.vidplayer').setAttribute('video-id','PT2_F-1esPk'); 
-        //     console.log('<33')
-        //   break;
-        //   case s < 67 : 
-        //     this.root.querySelector('.vidplayer').setAttribute('video-id','UqyT8IEBkvY'); 
-        //   break;
-        //   default: 
-        //     this.root.querySelector('.vidplayer').setAttribute('video-id','s6MwGeOm8iI'); 
-        //     console.log('default'); break;
-        // }
-        // this.$.player.play();
-        // this.$.player.pause();
       },
       getRandomColor: function () {
         var letters = '0123456789ABCDEF';
@@ -497,6 +487,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             var color = 'background-color: '+this.getRandomColor() +'; ';
             overlay.setAttribute('draggable','true');
             overlay.setAttribute('class','t-overlay');
+            overlay.setAttribute('id','overlay'+this.overlays[i].id);
             overlay.setAttribute('padding','3px;');
             var left = 'position: absolute; left: '+Math.round(this.overlays[i].startTime * 10000 / tLength)/100+'%; top:0%;';
             var others = 'height: inherit; float: left;'; 
