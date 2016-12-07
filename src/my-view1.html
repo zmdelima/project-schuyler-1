@@ -27,6 +27,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="shared-styles.html">
+<link rel="stylesheet" type="text/css" href="../bower_components/intro.js/introjs.css">
 
 <dom-module id="my-view1">
   <template>
@@ -121,7 +122,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </div>
 
   </template>
-
+  <script src="../bower_components/intro.js/intro.js"></script>
   <script>
     Polymer({
       is: 'my-view1',
@@ -449,6 +450,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         return Array.prototype.indexOf.call(node.parentNode.childNodes, node);
       },
       changeID : function(){
+        introJs().start();
+        console.log("asdas");
         var url = this.root.querySelector('#newID').value;
         console.log('new ID = '+url);
         var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
