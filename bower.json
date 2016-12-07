@@ -25,7 +25,9 @@
     "paper-material": "^1.0.6",
     "iron-image": "^1.2.5",
     "iron-behaviors": "PolymerElements/iron-behaviors#^1.0.17",
-    "google-youtube": "GoogleWebComponents/google-youtube#^1.2.1"
+    "google-youtube": "GoogleWebComponents/google-youtube#^1.2.1",
+    "paper-dialog": "PolymerElements/paper-dialog#^1.1.0",
+    "paper-input": "PolymerElements/paper-input#^1.1.22"
   },
   "devDependencies": {
     "web-component-tester": "^4.0.0"

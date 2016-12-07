@@ -22,6 +22,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/google-youtube/google-youtube.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-dialog-behavior/paper-dialog-behavior.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="shared-styles.html">
 
 <dom-module id="my-view1">
@@ -76,7 +80,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     on-google-youtube-state-change="handleStateChange"
                     on-google-youtube-error="handleYouTubeError"
                     class='vidplayer'
-                    video-id="s6MwGeOm8iI"
                     width="inherit"
                     height="inherit">
             </google-youtube>
@@ -105,8 +108,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 </div>
               </template>
           </div>
-          <button on-click="changeID">CHANGE VID NOW</button>
         </div>
+        <paper-button raised on-click="openModal">SET MAIN VIDEO</paper-button>
+        <paper-dialog id="modal" dialog>
+          <p>Enter youtube link</p>
+          <paper-input id="newID"></paper-input>
+          <div class="buttons">
+            <paper-button dialog-confirm on-tap="changeID" autofocus>Tap me to close</paper-button>
+          </div>
+        </paper-dialog>
       </div>
     </div>
 
@@ -204,32 +214,53 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         //Render overlays when current time and overylay start time matches
         console.log(this.overlays);
         for (var i=0; i<this.overlays.length; i++) {
-          if (this.overlays[i].startTime >= this.currentTime) {
+          if (this.overlays[i].startTime <= this.currentTime && this.overlays[i].startTime + this.overlays.length >= this.currentTime) {
+            console.log('in');
             console.log(this.overlays[i].name);
             this.renderOverlay(this.overlays[i],0);
-          } else if(this.overlays[i].startTime + this.overlays.length <= this.currentTime) {
+          } else if(this.overlays[i].startTime + this.overlays.length <= this.currentTime || this.overlays[i].startTime > this.currentTime) {
+            console.log('out');
+            console.log(this.overlays[i].name);
             this.renderOverlay(this.overlays[i],1);
           }
         }
       },
-      
+      openModal: function(){
+        this.$.modal.open();
+      },
       renderOverlay: function(o, mode) {
         console.log("rendering overlays");
         
         var overlay = document.createElement('div');
         overlay.style.zIndex = 2001;
-        overlay.style.width = "20vw";
-        overlay.style.height = "15vw";
+        overlay.style.width = "17.5%";
+        overlay.style.height = "22.5%";
         overlay.style.background = "blue";
         overlay.style.position = "absolute";
-        overlay.style.left = "1vw";
-        overlay.style.top = "3.5vw";
+        overlay.style.left = "4vw";
+        overlay.style.top = "7vw";
+        overlay.style.fontSize = "2.5vh";
         overlay.style.overflow = "hidden";
         overlay.style.wordBreak = "break-all";
-        overlay.innerHTML = o.name; 
+        var url = o.url;
+        console.log('new ID = '+url);
+        var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
+        var match = url.match(regExp);
+        var vidID =  (match&&match[7].length==11)? match[7] : false;
+        overlay.setAttribute('value',vidID);
+        if (o.layer == 'layer2') {
+          overlay.style.left = "44vw";
+        } else if (o.layer == 'layer3') {
+          overlay.style.top = "29.5vw";
+        } else if (o.layer == 'layer4') {
+          overlay.style.left = "44vw";
+          overlay.style.top = "29.5vw";
+        } 
+        overlay.innerHTML = o.name;
+        overlay.setAttribute('id','p-overlay'+o.id);
         
-        if(!mode)this.root.querySelector('#playerDiv').appendChild(overlay);
-        else this.root.querySelector('#playerDiv').removeChild(this.root.querySelector('#'+o.id));
+        if(mode==0 && this.root.querySelector('#p-overlay'+o.id) == null) this.root.querySelector('#playerDiv').appendChild(overlay);
+        else if(this.root.querySelector('#p-overlay'+o.id) != null && mode==1) this.root.querySelector('#playerDiv').removeChild(this.root.querySelector('#p-overlay'+o.id));
       },
       handleStateChange: function(event) {
         console.log(event.detail.data);
@@ -263,7 +294,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           ];
         
         
-        this.overlays2 = [
+        this.overlays = [
           {
             layer: 'layer2',
             name: 'dog2',
@@ -299,7 +330,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           },
           {
             layer: 'layer3',
-            name: 'cat2',
+            name: 'cat200',
             id: 'overlay5',
             length: 20,
             startTime: 30,
@@ -310,6 +341,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.mainMedia = {
           'length': 600
         };
+        this.$.modal.close();
         this.renderLayers();
       },
       truncate: function(str, num){
@@ -411,22 +443,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         return Array.prototype.indexOf.call(node.parentNode.childNodes, node);
       },
       changeID : function(){
-        var s = Math.random() * 100
-        console.log(s);
-        switch (true) {
-          case s < 33 : 
-            this.root.querySelector('.vidplayer').setAttribute('video-id','PT2_F-1esPk'); 
-            console.log('<33')
-          break;
-          case s < 67 : 
-            this.root.querySelector('.vidplayer').setAttribute('video-id','UqyT8IEBkvY'); 
-          break;
-          default: 
-            this.root.querySelector('.vidplayer').setAttribute('video-id','s6MwGeOm8iI'); 
-            console.log('default'); break;
-        }
-        this.$.player.play();
-        this.$.player.pause();
+        var url = this.root.querySelector('#newID').value;
+        console.log('new ID = '+url);
+        var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
+        var match = url.match(regExp);
+        var id =  (match&&match[7].length==11)? match[7] : false;
+        this.root.querySelector('.vidplayer').setAttribute('video-id',id);
       },
       getRandomColor: function () {
         var letters = '0123456789ABCDEF';
@@ -468,6 +490,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             var color = 'background-color: '+this.getRandomColor() +'; ';
             overlay.setAttribute('draggable','true');
             overlay.setAttribute('class','t-overlay');
+            overlay.setAttribute('id','overlay'+this.overlays[i].id);
             overlay.setAttribute('padding','3px;');
             var left = 'position: absolute; left: '+Math.round(this.overlays[i].startTime * 10000 / tLength)/100+'%; top:0%;';
             var others = 'height: inherit; float: left;'; 
