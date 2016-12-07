@@ -27,7 +27,8 @@
     "iron-behaviors": "PolymerElements/iron-behaviors#^1.0.17",
     "google-youtube": "GoogleWebComponents/google-youtube#^1.2.1",
     "paper-dialog": "PolymerElements/paper-dialog#^1.1.0",
-    "paper-input": "PolymerElements/paper-input#^1.1.22"
+    "paper-input": "PolymerElements/paper-input#^1.1.22",
+    "intro.js": "^2.3.0"
   },
   "devDependencies": {
     "web-component-tester": "^4.0.0"

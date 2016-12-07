@@ -27,6 +27,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="shared-styles.html">
+<link rel="stylesheet" type="text/css" href="../bower_components/intro.js/introjs.css">
 
 <dom-module id="my-view1">
   <template>
@@ -42,10 +43,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       path="/schuyler/text"
       data="{{text}}"
     ></firebase-document>
+    <firebase-document id="newItem"></firebase-document>
+    <firebase-query id="newArray"></firebase-query>
     <firebase-query
     id="query"
     path="/schuyler/mfdata"
     data="{{mfdataOnline}}"
+    ></firebase-query>
+    <firebase-query
+    id="query"
+    path="/schuyler/overlays"
+    data="{{overlays}}"
     ></firebase-query>
     <style is="custom-style" include="schuyler-home-page-style">
       :host {
@@ -114,14 +122,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </div>
     </div>
 
-    <!--<div class="card">-->
-    <!--  <div class="circle">1</div>-->
-    <!--  <h1>View One</h1>-->
-    <!--  <p>Ut labores minimum atomorum pro. Laudem tibique ut has.-->
-    <!--  <p>Lorem ipsum dolor sit amet, per in nusquam nominavi periculis, sit elit oportere ea.Lorem ipsum dolor sit amet, per in nusquam nominavi periculis, sit elit oportere ea.Cu mei vide viris gloriatur, at populo eripuit sit.</p>-->
-    <!--</div>-->
   </template>
-
+  <script src="../bower_components/intro.js/intro.js"></script>
   <script>
     Polymer({
       is: 'my-view1',
@@ -425,7 +427,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           return str.substr(0,num);
         }
       },
-      _overlayChange: function() {
+      _overlayChange: function(newData, oldData) {
+        console.log("firebase came through");
         var array = this.overlays;
         var key = 'layer';
         return array.sort(function(a, b) {
@@ -509,12 +512,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         } else if(dropElement.getAttribute('class') === 't-overlay') {
           console.log('AN OVERLAY!');
         }
-          this.renderLayers();
+        this.renderLayers();
+        this.$.query.save();
       },
       getChildNumber: function (node) {
         return Array.prototype.indexOf.call(node.parentNode.childNodes, node);
       },
       changeID : function(){
+        introJs().start();
+        console.log("asdas");
         var url = this.root.querySelector('#newID').value;
         if(url == '') return;
         // console.log('new ID = '+url);
