@@ -61,10 +61,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
     </style>
-    <div id="editor" on-click="" on-dragStart="onDragStart" on-dragEnd="onDragEnd">
+    <div id="editor" on-dragStart="onDragStart" on-dragEnd="onDragEnd">
       <div id="main-container">
         <div id="timeline-editor" >
-          <div id="playerDiv">
+          <div id="playerDiv" on-click="checkOverlay">
             <!--PLAYER-->
             <google-youtube id="player"
                     playsupported="{{playSupported}}"
@@ -102,21 +102,32 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </div>
         <div id="media-lib" >
           <div id="mlf">
-              <template is="dom-repeat" items="{{mfdataOnline}}">
+              <template id="mfitems" is="dom-repeat" items="{{mfdata}}">
                 <div class="mf" draggable="true">
-                  <img src="{{item.src}}" class="mf img" draggable="false" value="{{item}}"/>
+                  <img src="{{item.src}}" class="mf img" draggable="false" value="{{item}}"></img>
                   <p value="{{item}}"><br/>{{truncate(item.name,30)}}</p>
                 </div>
               </template>
           </div>
         </div>
         <paper-button raised id="mainVidSetter" on-click="openModal">SET MAIN VIDEO</paper-button>
+        <paper-button raised id="addMediaBtn" on-click="openModal2">Add MEDIA FILE</paper-button>
         <paper-button raised id="viewVid" on-click="changeMode" value="0" >VIEW VIDEO</paper-button>
         <paper-dialog id="modal" dialog>
           <p>Enter youtube link</p>
           <paper-input id="newID"></paper-input>
           <div class="buttons">
-            <paper-button dialog-confirm on-tap="changeID" autofocus>Tap me to close</paper-button>
+            <paper-button dialog-confirm on-tap="changeID" autofocus>OK</paper-button>
+          </div>
+        </paper-dialog>
+        <paper-dialog id="modal2" dialog>
+          <p>Enter youtube link</p>
+          <paper-input id="mfName" label="name"></paper-input>
+          <paper-input id="mfUrl" label="url"></paper-input>
+          <paper-input id="mfSrc" label="src"></paper-input>
+          <paper-input id="mfLength" auto-validate pattern="[0-9]*" label="length"></paper-input>
+          <div class="buttons">
+            <paper-button dialog-confirm on-tap="addMedia" autofocus>DONE</paper-button>
           </div>
         </paper-dialog>
       </div>
@@ -134,12 +145,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           observer: '_textChanged'
         },
         
-        mfdataOnline: {
-          type: Array,
-          value: [],
-          observer: '_mfdataChanged'
-        },
-        
         eventId:{
           type: String,
           value: null,
@@ -149,7 +154,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         mfdata: {
           type: Array,
           notify: true,
-          reflectToAttribute: true
+          reflectToAttribute: true,
+          observer: '_mfdataChanged'
         },
         layers: {
           type: Array,
@@ -202,6 +208,30 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         console.log(newData);
         console.log(oldData);
         this.mfdata = newData;
+        this.$.mfitems.render();
+      },
+      addMedia: function() {
+         var name = this.root.querySelector('#mfName').value;
+         var src = this.root.querySelector('#mfSrc').value;
+         var url = this.root.querySelector('#mfUrl').value;
+         var length = this.root.querySelector('#mfLength').value;
+         var key = this.mfdataOnline.length+1;
+         if (name == "") return; 
+         console.log(name);
+         console.log(src);
+         console.log(url);
+         console.log(length);
+         var newmf = {
+           'name':name.toString(),
+           'src':src.toString(),
+           'url':url.toString(),
+           'length':parseInt(length),
+           '$key': key.toString()
+         }
+         
+        this.push('mfdata', newmf);
+         console.log(this.mfdata);
+         this.$.mfitems.render();
       },
       changeMode: function() {
         // height: 48vh;
@@ -213,6 +243,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var hide = "visibility: hidden; display: none;";
         var show = "display: inline; visibility: visible;";
         var timeline = this.root.querySelector('#timeline');
+        var addMediaBtn = this.root.querySelector('#addMediaBtn');
         var playerDiv = this.root.querySelector('#playerDiv');
         var needle = this.root.querySelector('#needle');
         var mainVidSetter = this.root.querySelector('#mainVidSetter');
@@ -226,6 +257,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           mainVidSetter.style.visibility = 'none'; 
           medialib.style.display = 'hidden'; 
           medialib.style.display = 'none';
+          addMediaBtn.style.display = 'hidden'; 
+          addMediaBtn.style.display = 'none';
           player.style.width = '85vw';
           player.style.height = '80vh';
           playerDiv.style.width = '85vw';
@@ -239,6 +272,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           mainVidSetter.style.visibility = 'inline'; 
           medialib.style.display = 'visible'; 
           medialib.style.display = 'inline';
+          addMediaBtn.style.display = 'visible'; 
+          addMediaBtn.style.display = 'inline';
           player.style.width = '63vw';
           player.style.height = '48vh';
           playerDiv.style.width = '63vw';
@@ -286,6 +321,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       openModal: function(){
         this.$.modal.open();
       },
+      openModal2: function(){
+        this.$.modal2.open();
+      },
       renderOverlay: function(o, mode) {
         // console.log("rendering overlays");
         
@@ -293,22 +331,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         overlay.style.zIndex = 2001;
         overlay.style.width = "17.5%";
         overlay.style.height = "22.5%";
-        overlay.style.background = "blue";
+        // overlay.style.background = "rgba(0,0,0,1)";
         overlay.style.position = "absolute";
-        overlay.style.left = "4%";
-        overlay.style.top = "18%";
         overlay.style.fontSize = "2.5vh";
         overlay.style.overflow = "hidden";
         overlay.style.wordBreak = "break-all";
+        overlay.layer = o.layer;
         var url = o.url;
         // console.log('new ID = '+url);
         overlay.setAttribute('value','');
         if (!(url == '' || url == undefined)) {
-        var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
-        var match = url.match(regExp);
-        var vidID =  (match&&match[7].length==11)? match[7] : false;
-        overlay.setAttribute('value',vidID);
+          var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
+          var match = url.match(regExp);
+          var vidID =  (match&&match[7].length==11)? match[7] : false;
+          overlay.setAttribute('value',vidID);
         }
+        overlay.style.left = "4%";
+        overlay.style.top = "18%";
         if (o.layer == 'layer2') {
           overlay.style.left = "77%";
         } else if (o.layer == 'layer3') {
@@ -319,15 +358,57 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         } 
         var pic = document.createElement('img');
         pic.setAttribute('src',o.src);
-        pic.setAttribute('style','height:50%;width:50%;');
+        pic.setAttribute('style','height:100%;width:100%;');
         overlay.appendChild(pic);
-        var txt = document.createElement('p');
-        txt.style.zIndex = 2004;
-        overlay.innerHTML += o.name;
+        // var txt = document.createElement('p');
+        // txt.style.zIndex = 2004;
+        // overlay.innerHTML += o.name;
         overlay.setAttribute('id','p-overlay'+o.id);
+        overlay.setAttribute('class','p-overlays');
+        overlay.style.transition="all .2s ease-in-out";
+        overlay.mode = 0;
         
         if(mode==0 && this.root.querySelector('#p-overlay'+o.id) == null) this.root.querySelector('#playerDiv').appendChild(overlay);
         else if(this.root.querySelector('#p-overlay'+o.id) != null && mode==1) this.root.querySelector('#playerDiv').removeChild(this.root.querySelector('#p-overlay'+o.id));
+      },
+      openOverlay: function(){
+      },
+      checkOverlay: function(e){
+        console.log('coordinates');
+        console.log(e.clientX);
+        console.log(e.clientY);
+        var elem = this.root.elementFromPoint(e.clientX,e.clientY);
+        if(elem.parentNode.getAttribute('class') == 'p-overlays') {
+          //95.5 width
+          //85.5 height
+          //2 left
+          //6 top
+          console.log('layer');
+          console.log(elem.parentNode.layer);
+          console.log('val:'+elem.parentNode.mode);
+          if(elem.parentNode.mode == 0) { 
+            elem.parentNode.style.width = "95.5%";
+            elem.parentNode.style.height = "85.5%";
+            elem.parentNode.style.left = "2%";
+            elem.parentNode.style.top = "6%";
+            elem.parentNode.mode = 1;
+          } else {
+            elem.parentNode.style.width = "17.5%";
+            elem.parentNode.style.height = "22.5%";
+            elem.parentNode.style.left = "4%";
+            elem.parentNode.style.top = "18%";
+            if (elem.parentNode.layer === 'layer2') {
+              elem.parentNode.style.left = "77%";
+            } else if (elem.parentNode.layer === 'layer3') {
+              elem.parentNode.style.top = "49%";
+            } else if (elem.parentNode.layer === 'layer4') {
+              elem.parentNode.style.left = "77%";
+              elem.parentNode.style.top = "49%";
+            }
+            elem.parentNode.mode = 0;
+          }
+        }
+        console.log(elem.parentNode);
       },
       handleStateChange: function(event) {
         console.log(event.detail.data);
@@ -339,7 +420,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
       ready: function(){
-        this.mfdata1 = [
+        this.mfdata = [
             {
               src: '../../../images/manifest/icon-48x48.png',
               name: 'image1',
@@ -361,7 +442,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           ];
         
         
-        this.overlays = [
+        this.overlays2 = [
           {
             layer: 'layer2',
             name: 'dog2',
@@ -447,7 +528,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var dropElement = this.root.elementFromPoint(e.clientX, e.clientY);
         console.log(e.target);
         
-        
+        console.log(dropElement);
+        console.log('class'+this.dragData.getAttribute('class'));
+        if(dropElement.getAttribute('id') === "editor") {
+            
+        }
         //Check whether the user is trying to manipulate the overlay
         if (e.target.getAttribute('class') === 'startDiv') {
           var offset = this.$.editor.getBoundingClientRect().width * 0.05;
@@ -520,8 +605,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         return Array.prototype.indexOf.call(node.parentNode.childNodes, node);
       },
       changeID : function(){
-        introJs().start();
-        console.log("asdas");
         var url = this.root.querySelector('#newID').value;
         if(url == '') return;
         // console.log('new ID = '+url);
@@ -556,13 +639,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
            l = document.createElement('div');
            l.setAttribute('id','layer'+i);
            l.setAttribute('class','t-layer');
-           l.setAttribute('style','width: inherit; height: 5vh; position: relative;');
+           l.setAttribute('style','width: inherit; height: 8vh; position: relative;');
            this.root.querySelector('#timeline').appendChild(l);
          }
          for(i=0; i<len; i++){
            var layer = this.overlays[i].layer;
            var exist = (this.root.querySelector('#'+layer) == null) ? false : true;
            var l;
+           if ((this.overlays[i].startTime + this.overlays[i].length > this.duration) || (this.overlays[i].startTime < 0)) {
+             this.overlays.splice(i,1);
+           }
           // console.log(exist);
            //create OVERLAY OBJ
             var overlay = document.createElement('div');
