@@ -97,7 +97,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <!--<template id="timeline-overlay-repeat" is="dom-repeat" items="[[layers]]">-->
             <!--  <editor-layer id="[[item.id]]" class="tlayer" overlays="[[item.value]]" length="[[mainMedia.length]]" style="[[item.style]]"></editor-layer>-->
             <!--</template>-->
-            <div id="needle" style="width: 2px; background-color: red; position: relative; height: 100%; z-Index:3000; float: left; left: 0vw;"></div>
+            <div id="needle" style="width: 2px; background-color: red; position: relative; height: inherit; z-Index:3000; float: left; left: 0vw;"></div>
           </div>
         </div>
         <div id="media-lib" >
@@ -214,6 +214,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var show = "display: inline; visibility: visible;";
         var timeline = this.root.querySelector('#timeline');
         var playerDiv = this.root.querySelector('#playerDiv');
+        var needle = this.root.querySelector('#needle');
         var mainVidSetter = this.root.querySelector('#mainVidSetter');
         var medialib = this.root.querySelector('#media-lib');
         var player = this.root.querySelector('#player');
@@ -245,7 +246,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.root.querySelector('#viewVid').setAttribute('value','0');
           this.root.querySelector('#viewVid').innerHTML = "VIEW VIDEO";
         }
-        
+        needle.setAttribute('style','width: 2px; background-color: red; position: relative; height: inherit; z-Index:3000; float: left; left: 0vw;');
       },
       reposition: function(event) {
         var timelineDiv = this.$.timeline;
@@ -309,12 +310,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         overlay.setAttribute('value',vidID);
         }
         if (o.layer == 'layer2') {
-          overlay.style.left = "49%";
+          overlay.style.left = "77%";
         } else if (o.layer == 'layer3') {
-          overlay.style.top = "56%";
+          overlay.style.top = "49%";
         } else if (o.layer == 'layer4') {
-          overlay.style.left = "49%";
-          overlay.style.top = "56%";
+          overlay.style.left = "77%";
+          overlay.style.top = "49%";
         } 
         var pic = document.createElement('img');
         pic.setAttribute('src',o.src);
@@ -546,7 +547,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       
       renderLayers: function(){
          var c = this.root.querySelector('#timeline');
-         c.innerHTML = '<div id="needle" style="width: 1px; background-color: red; position: relative; height: 100%; z-Index:3000; float: left; left: 0vw;"></div>';
+         c.innerHTML = '<div id="needle" style="width: 2px; background-color: red; position: relative; height: inherit; z-Index:3000; float: left; left: 0vw;"></div>';
          var len = this.overlays.length;
          var i;
          
